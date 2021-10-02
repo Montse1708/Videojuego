@@ -1,0 +1,526 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Kings and pigs </title>
+    <script src="//cdn.jsdelivr.net/npm/phaser@3.11.0/dist/phaser.js"></script>
+    <style type="text/css">
+        body {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+
+<script type="text/javascript">
+
+var config = {
+type: Phaser.AUTO,
+width: 1370,
+height: 665,
+physics: {
+    default: 'arcade',
+    arcade: {
+        gravity: { y: 300 },
+        debug: false
+    }
+},
+scene: {
+    preload: preload,
+    create: create,
+    update: update
+}
+};
+
+    var game = new Phaser.Game(config);
+    var platforms;
+    var player;
+    var cursors;
+    var score = 0;
+    var scoreText;
+    var gameOver = false;
+    var bombs;
+    var canons;
+    var pig;
+    var box;
+    var vida;
+    var vida1;
+    var vida2;
+    var vida3;
+    var scorevida = 3;
+    var plataformas;
+    var door;
+    let keyA;
+    var win = 0;
+    var diamonds;
+
+    function preload ()
+    {
+        this.load.image('sky', 'Sprites/fondo.png');
+        this.load.image('quieto', 'Sprites/Idle.png');
+        this.load.image('ground', 'Sprites/platform.png');
+        this.load.image('diamond', 'Sprites/Diamond.png');
+        this.load.image('box', 'Sprites/box.png');
+        this.load.image('bomb', 'Sprites/Cannon Ball.png');
+        this.load.image('door', 'Sprites/door.png');
+        this.load.image('title', 'Sprites/Kings and Pigs.png');
+        this.load.image('salta', 'Sprites/Jump (78x58).png');
+        this.load.image('menos', 'Sprites/vacio.png');
+        this.load.image('die', 'Sprites/Dead (78x58).png');
+        this.load.image('barra', 'Sprites/Live Bar.png');
+        this.load.image('plataforma', 'Sprites/Decorations (32x32).png');
+        this.load.spritesheet('dude', 'Sprites/dude.png',{frameWidth: 78, frameHeight: 45});
+        this.load.spritesheet('left', 'Sprites/left.png',{frameWidth: 78, frameHeight: 45});
+        this.load.spritesheet('attack', 'Sprites/Attack (78x58).png',{frameWidth: 78, frameHeight: 45});
+        this.load.spritesheet('attackleft', 'Sprites/attack left.png',{frameWidth: 78, frameHeight: 45});
+        this.load.spritesheet('stop', 'Sprites/Ground (78x58).png',{frameWidth: 60, frameHeight: 45});
+        this.load.spritesheet('canon', 'Sprites/Shoot (44x28).png',{frameWidth: 44, frameHeight: 28});
+        this.load.spritesheet('pig', 'Sprites/Run (34x28).png',{frameWidth: 34, frameHeight: 28});
+        //this.load.spritesheet('die', 'Sprites/Dead (78x58).png',{frameWidth: 78, frameHeight: 58});
+        this.load.spritesheet('corazon', 'Sprites/Big Heart Idle (18x14).png',{frameWidth: 18, frameHeight: 14});
+        this.load.spritesheet('open', 'Sprites/Opening (46x56).png',{frameWidth: 46, frameHeight: 56});
+        this.load.spritesheet('enter', 'Sprites/Door In (78x58).png',{frameWidth: 78, frameHeight: 58});
+        this.load.spritesheet('pigleft', 'Sprites/pig.png',{frameWidth: 34, frameHeight: 28});
+        //this.load.spritesheet('diamod', 'Sprites/Big Diamond Idle (18x14).png',{frameWidth: 45, frameHeight: 28});
+    }
+
+    function create ()
+    {
+      this.add.image(801, 301, 'sky');
+      this.add.image(500, 300, 'diamond').setScale(4);
+      this.add.image(900, 300, 'sky');
+      //this.add.image(90, 130, 'door').setScale(2);
+
+      this.add.image(1200, 55, 'barra').setScale(3);
+
+      keyA = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
+
+      vida1 = this.add.sprite(1165, 55, 'corazon').setScale(2);
+      vida2 = this.add.sprite(1195, 55, 'corazon').setScale(2);
+      vida3 = this.add.sprite(1230, 55, 'corazon').setScale(2);
+
+      this.add.image(650, 50, 'title').setScale(0.09);
+
+      plataformas = this.physics.add.staticGroup();
+      plataformas.create(1200, 500, 'plataforma').setScale(2);
+      plataformas.create(1200, 500, 'plataforma').setScale(2);
+
+      platforms = this.physics.add.staticGroup();
+
+      platforms.create(90, 630, 'ground').setScale(2).refreshBody();
+      platforms.create(280, 630, 'ground').setScale(2).refreshBody();
+      platforms.create(470, 630, 'ground').setScale(2).refreshBody();
+      platforms.create(660, 630, 'ground').setScale(2).refreshBody();
+      platforms.create(850, 630, 'ground').setScale(2).refreshBody();
+      platforms.create(1040, 630, 'ground').setScale(2).refreshBody();
+      platforms.create(1230, 630, 'ground').setScale(2).refreshBody();
+      platforms.create(1420, 630, 'ground').setScale(2).refreshBody();
+
+      platforms.create(45, 450, 'ground');
+      platforms.create(130, 450, 'ground');
+      platforms.create(215, 450, 'ground');
+      platforms.create(300, 450, 'ground');
+
+      platforms.create(45, 450, 'ground');
+      platforms.create(130, 450, 'ground');
+      platforms.create(215, 450, 'ground');
+      platforms.create(1320, 400, 'ground');
+
+      platforms.create(50, 200, 'ground');
+      platforms.create(125, 200, 'ground');
+
+      door = this.physics.add.sprite(90, 130, 'open').setScale(2);
+      this.anims.create({
+          key: 'puerta',
+          frames: this.anims.generateFrameNumbers('open', { start: 0, end: 4 }),
+          frameRate: 10,
+          repeat: 0
+      });
+      this.physics.add.collider(door, platforms);
+
+      player = this.physics.add.sprite(100, 450, 'dude').setScale(2);
+      player.setBounce(0.2);
+      player.setCollideWorldBounds(true);
+
+      this.anims.create({
+          key: 'left',
+          frames: this.anims.generateFrameNumbers('left', { start: 0, end: 7 }),
+          frameRate: 10,
+          repeat: -1
+      });
+      this.anims.create({
+          key: 'turn',
+          frames: [ { key: 'stop', frame: 0} ],
+          frameRate: 20
+      });
+      this.anims.create({
+          key: 'jump',
+          frames: [ { key: 'salta', frame: 0} ],
+          frameRate: 20
+      });
+      this.anims.create({
+          key: 'right',
+          frames: this.anims.generateFrameNumbers('dude', { start: 0, end: 7}),
+          frameRate: 10,
+          repeat: -1
+      });
+      this.anims.create({
+        key: 'space',
+        frames: this.anims.generateFrameNumbers('attack', { start: 0, end: 3 }),
+        frameRate: 10,
+        repeat: -1
+      });
+      this.anims.create({
+        key: 'izquierda',
+        frames: this.anims.generateFrameNumbers('attackleft', { start: 0, end: 3 }),
+        frameRate: 10,
+        repeat: -1
+      });
+      this.anims.create({
+        key: 'fin',
+        frames: [ { key: 'die', frame: 0} ],
+        frameRate: 20
+      });
+      this.anims.create({
+        key: 'in',
+        frames: this.anims.generateFrameNumbers('enter', { start: 0, end: 7 }),
+        frameRate: 10,
+        repeat: 0
+      });
+
+        diamonds = this.physics.add.group({
+          key: 'diamond',
+          repeat: 9,
+          setXY: { x:200, y: 0, stepX: 120 }
+        });
+        /*this.anims.create({
+          key: 'premio',
+          frames: this.anims.generateFrameNumbers('diamod', { start: 0, end: 9 }),
+          frameRate: 10,
+          repeat: -1
+        });*/
+        this.physics.add.collider(diamonds, platforms);
+
+  diamonds.children.iterate(function (child) {
+      child.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
+  });
+  this.physics.add.collider(player, platforms);
+
+  pig = this.physics.add.sprite(900, 450, 'pig').setScale(2);
+  pig.direction = -1;
+  pig.setBounceX(1);
+  pig.setCollideWorldBounds(true);
+  this.physics.add.collider(pig, platforms);
+  pig.setVelocity(-100);
+
+  this.anims.create({
+    key: 'run',
+    frames: this.anims.generateFrameNumbers('pig', { start: 0, end: 5 }),
+    frameRate: 10,
+    repeat: -1
+  });
+  this.anims.create({
+    key: 'voltear',
+    frames: this.anims.generateFrameNumbers('pigleft', { start: 0, end: 5 }),
+    frameRate: 10,
+    repeat: -1
+  });
+  this.physics.add.collider(player, pig, restscore, null, this);
+
+  canons = this.physics.add.sprite(1050, 450, 'canon').setScale(2);
+  canons.setCollideWorldBounds(true);
+  this.anims.create({
+      key: 'idle',
+      frames: [ { key: 'quieto', frame: 0} ],
+      frameRate: 20
+  });
+  this.anims.create({
+      key: 'disparo',
+      frames: this.anims.generateFrameNumbers('canon', { start: 0, end: 3}),
+      frameRate: 1,
+      repeat: 0
+  });
+  this.physics.add.collider(canons, platforms);
+
+  cursors = this.input.keyboard.createCursorKeys();
+  this.physics.add.collider(diamonds, platforms);
+  this.physics.add.collider(diamonds, plataformas);
+  this.physics.add.overlap(player, diamonds, collectStar, null, this);
+
+  bombs = this.physics.add.group();
+  this.physics.add.collider(bombs, platforms);
+  this.physics.add.collider(player, bombs, hitBomb, null, this);
+
+  box = this.physics.add.group();
+  this.physics.add.collider(player, box, hitBomb, null, this);
+  this.physics.add.collider(box, platforms, hitBox, null, this);
+
+  vida = this.physics.add.sprite(1000, 450, 'corazon').setScale(3);
+  this.anims.create({
+      key: 'health',
+      frames: this.anims.generateFrameNumbers('corazon', { start: 0, end: 7 }),
+      frameRate: 10,
+      repeat: -1
+  });
+  this.physics.add.collider(vida, platforms);
+  this.physics.add.collider(player, vida, masvida, null, this);
+
+  this.anims.create({
+      key: 'off',
+      frames: [ { key: 'menos', frame: 0} ],
+      frameRate: 20
+  });
+
+  scoreText = this.add.text(16, 16, 'score: 0', { fontSize: '32px', fill: '#000' });
+  }
+
+    function update ()
+    {
+      move(pig);
+      verificar();
+      vida.anims.play('health', true);
+      if (gameOver == false){
+        if(keyA.isDown && score >= 50 && (player.x > 50 && player.x < 130) && (player.y > 130 && player.y < 180))
+        {
+          door.anims.play('puerta');
+          scoreText.setText('You win');
+          player.anims.play('in', true);
+          win = 1;
+        }
+        if (cursors.left.isDown && !cursors.space.isDown)
+        {
+            player.setVelocityX(-160);
+            player.anims.play('left', true);
+        }
+        else if (cursors.right.isDown)
+        {
+            player.setVelocityX(160);
+            player.anims.play('right', true);
+        }
+
+        else if(cursors.space.isDown)
+        {
+          if(cursors.left.isDown)
+          {
+            player.anims.play('izquierda', true);
+          }
+          else
+          {
+            player.anims.play('space', true);
+          }
+        }
+        else if(cursors.up.isDown)
+        {
+          player.anims.play('jump', true);
+        }
+        else
+        {
+            player.setVelocityX(0);
+            if(win != 1)
+            {
+              player.anims.play('turn', true);
+            }
+        }
+        if (cursors.up.isDown && player.body.touching.down)
+        {
+            player.anims.play('jump', true);
+            player.setVelocityY(-500);
+        }
+      }
+      if (cursors.up.isDown &&  gameOver == true)
+     {
+        gameOver = false;
+        scorevida = 3;
+        this.physics.resume();
+        diamonds.children.iterate(function (child) {
+            child.enableBody(true, child.x, 0, true, true);
+        });
+        score = 0;
+        scoreText.setText('Score: ' + score);
+
+        pig = this.physics.add.sprite(900, 500, 'pig').setScale(2);
+        pig.direction = -1;
+        pig.setBounceX(1);
+        pig.setCollideWorldBounds(true);
+        this.physics.add.collider(pig, platforms);
+        pig.setVelocity(-100);
+        this.physics.add.collider(player, pig, restscore, null, this);
+     }
+}
+
+function collectStar (player, diamond)
+{
+    diamond.disableBody(true, true);
+    score += 10;
+    scoreText.setText('Score: ' + score);
+
+    if (score %20 == 0)
+    {
+        var x = (player.x < 400) ? Phaser.Math.Between(400, 800) : Phaser.Math.Between(0, 400);
+
+        var boxes = box.create(x, 16, 'box').setScale(2);
+        boxes.setCollideWorldBounds(true);
+        boxes.setVelocity(Phaser.Math.Between(-200, 200), 20);
+
+        canons.anims.play('disparo', true);
+
+        var bomb = bombs.create(1015, 560, 'bomb').setScale(2);
+        bomb.setCollideWorldBounds(true);
+        bomb.direction = 1;
+        bomb.setVelocityX(-100);
+        bomb.setVelocityY(-14);
+    }
+    if (diamonds.countActive(true) === 0)
+    {
+      diamonds.children.iterate(function (child) {child.enableBody(true, child.x, 0, true, true);});
+    }
+}
+
+function masvida(player, vida)
+{
+  if(scorevida < 3)
+  {
+    scorevida += 1;
+    verificar();
+  }
+  var x = (player.x < 400) ? Phaser.Math.Between(400, 800) : Phaser.Math.Between(0, 400);
+  vida.disableBody(true, true);
+  vida = this.physics.add.sprite(x, 20, 'corazon').setScale(3);
+  vida.setBounce(0.2);
+  vida.setCollideWorldBounds(true);
+  this.physics.add.collider(vida, platforms);
+  this.physics.add.collider(vida, plataformas);
+  vida.setVelocity(50);
+  this.physics.add.collider(player, vida, masvida, null, this);
+  vida.anims.play('health', true);
+}
+
+function verificar()
+{
+    if(scorevida == 1)
+    {
+      vida1.x = 1165;
+      vida1.y = 55;
+      vida2.x = 1202;
+      vida2.y = 55;
+      vida3.x = 1234;
+      vida3.y = 55;
+      vida1.anims.play("health", true);
+      vida2.anims.play("off", true);
+      vida3.anims.play("off", true);
+    }
+    else if(scorevida == 2)
+    {
+      vida1.x = 1165;
+      vida1.y = 55;
+      vida2.x = 1195;
+      vida2.y = 55;
+      vida3.x = 1234;
+      vida3.y = 55;
+      vida1.anims.play("health", true);
+      vida2.anims.play("health", true);
+      vida3.anims.play("off", true);
+    }
+    else if(scorevida == 3)
+    {
+      vida1.x = 1165;
+      vida1.y = 55;
+      vida2.x = 1195;
+      vida2.y = 55;
+      vida3.x = 1230;
+      vida3.y = 55;
+      vida1.anims.play("health", true);
+      vida2.anims.play("health", true);
+      vida3.anims.play("health", true);
+    }
+    else if (scorevida == 0)
+    {
+      vida1.x = 1169;
+      vida1.y = 55;
+      vida2.x = 1202;
+      vida2.y = 55;
+      vida3.x = 1234;
+      vida3.y = 55;
+      vida1.anims.play("off", true);
+      vida2.anims.play("off", true);
+      vida3.anims.play("off", true);
+    }
+}
+
+function hitBomb (player, bomb)
+{
+    scorevida -= 1;
+    verificar();
+    if(scorevida <= 0)
+    {
+      player.anims.play('fin', true);
+      canons.anims.play('idle', true);
+      pig.disableBody(true, true);
+      this.physics.pause();
+      scoreText.setText('Game Over');
+      gameOver = true;
+    }
+    bomb.disableBody(true, true);
+}
+
+function restscore (player, bomb)
+{
+    if(!cursors.space.isDown)
+    {
+      score -= 10;
+      scoreText.setText('Score: ' + score);
+      bomb.disableBody(true, true);
+    }
+    if(score < 0)
+    {
+      player.anims.play('fin', true);
+      canons.anims.play('idle', true);
+      pig.disableBody(true, true);
+      this.physics.pause();
+      scoreText.setText('Game Over');
+      gameOver = true;
+    }
+    pig.disableBody(true, true);
+    pig = this.physics.add.sprite(900, 500, 'pig').setScale(2);
+    pig.direction = -1;
+    pig.setBounceX(1);
+    pig.setCollideWorldBounds(true);
+    this.physics.add.collider(pig, platforms);
+    pig.setVelocity(-100);
+    this.physics.add.collider(player, pig, restscore, null, this);
+}
+
+function move(pig)
+{
+  switch (pig.direction) {
+    case 1:
+      pig.setVelocityX(45)
+      pig.anims.play('voltear', true);
+      if(pig.x+60 >= 1370){
+        pig.anims.play('run', true);
+        pig.setVelocityX(-45)
+        pig.direction = -1;
+      }
+      break;
+    case -1:
+      pig.setVelocityX(-45)
+      pig.anims.play('run', true);
+      if(pig.x-60 <= 0){
+        pig.anims.play('voltear', true);
+        pig.setVelocityX(45)
+        pig.direction = 1;
+      }
+      break;
+    default:
+      break;
+  }
+}
+
+function hitBox(boxes, platforms)
+{
+  boxes.disableBody(true, true);
+}
+</script>
+
+</body>
+</html>
